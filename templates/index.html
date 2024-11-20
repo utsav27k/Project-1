@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Encryption and Decryption</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 500px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin: 15px 0 5px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007BFF;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .output {
+      background: #f1f1f1;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Encryption & Decryption</h2>
+
+    <!-- Encryption Section -->
+    <label for="encrypt-text">Text to Encrypt:</label>
+    <textarea id="encrypt-text" rows="3" placeholder="Enter text here..."></textarea>
+    <button onclick="encryptText()">Encrypt</button>
+
+    <!-- Encryption Output -->
+    <div id="encrypt-output" class="output" style="display: none;">
+      <p><strong>Ciphertext:</strong> <span id="ciphertext"></span></p>
+      <p><strong>Key:</strong> <span id="key"></span></p>
+      <p><strong>IV:</strong> <span id="iv"></span></p>
+    </div>
+
+    <!-- Decryption Section -->
+    <label for="decrypt-ciphertext">Ciphertext:</label>
+    <textarea id="decrypt-ciphertext" rows="3" placeholder="Enter ciphertext here..."></textarea>
+    <label for="decrypt-key">Key:</label>
+    <input type="text" id="decrypt-key" placeholder="Enter base64-encoded key">
+    <label for="decrypt-iv">IV:</label>
+    <input type="text" id="decrypt-iv" placeholder="Enter base64-encoded IV">
+    <button onclick="decryptText()">Decrypt</button>
+
+    <!-- Decryption Output -->
+    <div id="decrypt-output" class="output" style="display: none;">
+      <p><strong>Decrypted Text:</strong> <span id="plaintext"></span></p>
+    </div>
+  </div>
+
+  <script>
+    const apiUrl = 'http://127.0.0.1:5000';
+
+    // Encrypt Text
+    async function encryptText() {
+      const text = document.getElementById('encrypt-text').value;
+      if (!text) {
+        alert('Please enter text to encrypt!');
+        return;
+      }
+
+      const response = await fetch(`${apiUrl}/encrypt`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text })
+      });
+
+      const result = await response.json();
+      document.getElementById('encrypt-output').style.display = 'block';
+      document.getElementById('ciphertext').textContent = result.ciphertext;
+      document.getElementById('key').textContent = result.key;
+      document.getElementById('iv').textContent = result.iv;
+    }
+
+    // Decrypt Text
+    async function decryptText() {
+      const ciphertext = document.getElementById('decrypt-ciphertext').value;
+      const key = document.getElementById('decrypt-key').value;
+      const iv = document.getElementById('decrypt-iv').value;
+
+      if (!ciphertext || !key || !iv) {
+        alert('Please provide ciphertext, key, and IV for decryption!');
+        return;
+      }
+
+      const response = await fetch(`${apiUrl}/decrypt`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ciphertext, key, iv })
+      });
+
+      const result = await response.json();
+      document.getElementById('decrypt-output').style.display = 'block';
+      document.getElementById('plaintext').textContent = result.plaintext;
+    }
+  </script>
+</body>
+</html>
